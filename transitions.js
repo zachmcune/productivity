@@ -526,21 +526,31 @@
   }
 
   function isTransitionsEnabled() {
-    if (window.HubStorage?.isCloud()) {
-      return HubStorage.getSync(SETTINGS_KEY, 'true') !== 'false';
-    }
     return localStorage.getItem(SETTINGS_KEY) !== 'false';
   }
 
-  async function createToggle() {
-    let enabled = true;
+  function saveTransitionSetting(value) {
+    localStorage.setItem(SETTINGS_KEY, value);
+    if (window.HubStorage) {
+      HubStorage.init().then(() => {
+        if (HubStorage.isCloud()) HubStorage.set(SETTINGS_KEY, value);
+      });
+    }
+  }
+
+  async function loadTransitionSetting() {
     if (window.HubStorage) {
       await HubStorage.init();
-      const stored = await HubStorage.get(SETTINGS_KEY, 'true');
-      enabled = stored !== 'false';
-    } else {
-      enabled = isTransitionsEnabled();
+      if (HubStorage.isCloud()) {
+        const stored = await HubStorage.get(SETTINGS_KEY, null);
+        if (stored !== null) localStorage.setItem(SETTINGS_KEY, stored);
+      }
     }
+  }
+
+  async function createToggle() {
+    await loadTransitionSetting();
+    const enabled = isTransitionsEnabled();
 
     const wrap = document.createElement('div');
     wrap.id = 'transition-toggle';
@@ -554,18 +564,12 @@
     `;
     document.body.appendChild(wrap);
 
-    document.getElementById('transition-toggle-input').addEventListener('change', async (e) => {
-      const value = e.target.checked ? 'true' : 'false';
-      if (window.HubStorage) {
-        await HubStorage.set(SETTINGS_KEY, value);
-      } else {
-        localStorage.setItem(SETTINGS_KEY, value);
-      }
+    document.getElementById('transition-toggle-input').addEventListener('change', (e) => {
+      saveTransitionSetting(e.target.checked ? 'true' : 'false');
     });
   }
 
   async function init() {
-    if (window.HubStorage) await HubStorage.init();
     setupCanvas();
     await createToggle();
 
