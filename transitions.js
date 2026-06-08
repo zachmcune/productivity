@@ -2,6 +2,7 @@
   const ENTER_MS = 2000;
   const MAX_EXIT_MS = 5500;
   const STORAGE_KEY = 'hub-transition';
+  const SETTINGS_KEY = 'hub-transitions-enabled';
   const MAX_BALLS = 900;
   const SAMPLE_STEP = 4;
   const GRAVITY = 0.6;
@@ -524,10 +525,34 @@
     requestAnimationFrame(frame);
   }
 
+  function isTransitionsEnabled() {
+    return localStorage.getItem(SETTINGS_KEY) !== 'false';
+  }
+
+  function createToggle() {
+    const wrap = document.createElement('div');
+    wrap.id = 'transition-toggle';
+    wrap.className = 'transition-toggle';
+    wrap.innerHTML = `
+      <label class="transition-toggle-label" title="Page transition animations">
+        <span class="transition-toggle-text">Animations</span>
+        <input type="checkbox" id="transition-toggle-input" ${isTransitionsEnabled() ? 'checked' : ''}>
+        <span class="transition-toggle-slider"></span>
+      </label>
+    `;
+    document.body.appendChild(wrap);
+
+    document.getElementById('transition-toggle-input').addEventListener('change', (e) => {
+      localStorage.setItem(SETTINGS_KEY, e.target.checked ? 'true' : 'false');
+    });
+  }
+
   function init() {
     setupCanvas();
+    createToggle();
 
     document.addEventListener('click', e => {
+      if (!isTransitionsEnabled()) return;
       const link = e.target.closest('a[href]');
       if (!link || !isInternalLink(link) || running) return;
       e.preventDefault();
@@ -537,6 +562,12 @@
         window.location.href = dest;
       });
     });
+
+    if (!isTransitionsEnabled()) {
+      document.documentElement.classList.remove('page-enter-pending');
+      sessionStorage.removeItem(STORAGE_KEY);
+      return;
+    }
 
     if (sessionStorage.getItem(STORAGE_KEY) === '1') {
       sessionStorage.removeItem(STORAGE_KEY);

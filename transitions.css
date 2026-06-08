@@ -31,3 +31,66 @@ body.transition-chrome-hidden main {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+.transition-toggle {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 100000;
+}
+
+.transition-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.85rem;
+  background: #1e1e2a;
+  border: 1px solid #2e2e3d;
+  border-radius: 2rem;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.transition-toggle-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #8888a0;
+}
+
+.transition-toggle-label input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.transition-toggle-slider {
+  position: relative;
+  width: 2.5rem;
+  height: 1.35rem;
+  background: #35354a;
+  border-radius: 1rem;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.transition-toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  left: 0.18rem;
+  top: 0.18rem;
+  background: #eaeaf0;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.transition-toggle-label input:checked + .transition-toggle-slider {
+  background: #6c8cff;
+}
+
+.transition-toggle-label input:checked + .transition-toggle-slider::before {
+  transform: translateX(1.15rem);
+}
