@@ -14,7 +14,7 @@
 <body>
   <main class="page">
     <h1 class="page-title">Brain Break</h1>
-    <p class="page-subtitle">Pick a mini game for a quick mental reset.</p>
+    <p class="page-subtitle">Pick a mini game for a quick mental reset. High scores sync to your account when signed in.</p>
 
     <div class="game-picker">
       <button class="game-pick active" data-game="memory">🃏 Memory</button>
@@ -31,6 +31,7 @@
           <div class="stat"><div class="stat-value" id="mem-pairs">0 / 8</div><div class="stat-label">Pairs</div></div>
           <div class="stat"><div class="stat-value" id="mem-timer">0:00</div><div class="stat-label">Time</div></div>
         </div>
+        <p class="game-best" id="memory-best">Best: —</p>
         <div class="game-board" id="mem-board"></div>
         <div class="game-message" id="mem-message">Flip two cards to find matching pairs.</div>
         <div class="game-controls"><button class="btn btn-primary" id="mem-new">New Game</button></div>
@@ -42,6 +43,7 @@
           <div class="stat"><div class="stat-value" id="ast-lives">3</div><div class="stat-label">Lives</div></div>
           <div class="stat"><div class="stat-value" id="ast-level">1</div><div class="stat-label">Wave</div></div>
         </div>
+        <p class="game-best" id="asteroids-best">Best score: —</p>
         <p class="controls-hint">← → rotate · ↑ thrust · Space shoot · Survive the rocks!</p>
         <div class="game-canvas-wrap"><canvas id="ast-canvas" class="game-canvas" width="480" height="480"></canvas></div>
         <div class="game-message" id="ast-message">Destroy asteroids before they hit you.</div>
@@ -54,6 +56,7 @@
           <div class="stat"><div class="stat-value" id="pac-dots">0</div><div class="stat-label">Dots Left</div></div>
           <div class="stat"><div class="stat-value" id="pac-lives">3</div><div class="stat-label">Lives</div></div>
         </div>
+        <p class="game-best" id="pacman-best">Best score: —</p>
         <p class="controls-hint">Arrow keys to move · Eat all dots in the RAD maze</p>
         <div class="game-canvas-wrap"><canvas id="pac-canvas" class="game-canvas" width="456" height="168"></canvas></div>
         <div class="game-message" id="pac-message">Clear the RAD-shaped maze!</div>
@@ -65,6 +68,7 @@
           <span>Question <strong id="q-num">1</strong> of 20</span>
           <span id="q-status">Think of something — I'll try to guess it!</span>
         </div>
+        <p class="game-best" id="questions-best">Best guess: —</p>
         <div class="q-log" id="q-log"></div>
         <div class="q-answers" id="q-answers">
           <button class="q-answer-btn yes" data-answer="yes">Yes</button>
@@ -84,8 +88,9 @@
         <div class="game-header">
           <div class="stat"><div class="stat-value" id="drive-speed">0</div><div class="stat-label">km/h</div></div>
           <div class="stat"><div class="stat-value" id="drive-laps">0</div><div class="stat-label">Laps</div></div>
-          <div class="stat"><div class="stat-value" id="drive-best">—</div><div class="stat-label">Best lap</div></div>
+          <div class="stat"><div class="stat-value" id="drive-best">—</div><div class="stat-label">Session best</div></div>
         </div>
+        <p class="game-best" id="drive-best-record">Best lap: —</p>
         <p class="controls-hint">WASD or Arrow keys · Drive around the oval track</p>
         <div id="drive-container"></div>
         <div class="game-message" id="drive-message">Race around the track — cross the start line to count laps!</div>
@@ -101,6 +106,7 @@
     SiteLayout.injectNav();
     HubAuth.bindNav();
   </script>
+  <script src="games/scores.js"></script>
   <script src="games/hub.js"></script>
   <script src="games/memory.js"></script>
   <script src="games/asteroids.js"></script>

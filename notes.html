@@ -103,12 +103,24 @@
       font-size: 0.8rem;
       color: var(--text-muted);
     }
+
+    .sync-status {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: -1rem 0 1.5rem;
+    }
+
+    .sync-status.cloud {
+      color: var(--success);
+    }
   </style>
 </head>
 <body>
   <main class="page">
     <h1 class="page-title">Notes & To-Do</h1>
-    <p class="page-subtitle">Capture thoughts and track what needs doing. Saved automatically — in the cloud when signed in.</p>
+    <p class="page-subtitle">Capture thoughts and track what needs doing.</p>
+    <p class="sync-status" id="sync-status"></p>
 
     <div class="panel">
       <div class="section-label">To-Do List</div>
@@ -217,6 +229,13 @@
 
     (async () => {
       await HubStorage.init();
+      const status = document.getElementById('sync-status');
+      if (HubStorage.isCloud()) {
+        status.textContent = '☁️ Synced to your account';
+        status.classList.add('cloud');
+      } else {
+        status.innerHTML = 'Saved in this browser only — <a href="account.html">sign in</a> to sync across devices';
+      }
       todos = JSON.parse(await HubStorage.get(TODO_KEY, '[]'));
       notesArea.value = await HubStorage.get(NOTES_KEY, '');
       charCount.textContent = `${notesArea.value.length} characters`;

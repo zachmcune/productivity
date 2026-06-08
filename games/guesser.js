@@ -179,7 +179,16 @@
         akPhase = 'won';
         qSetAnswersEnabled(false, false);
         document.getElementById('q-status').textContent = 'Got it!';
-        qAddBubble('computer', `I knew it! ${akGuessTarget.article} ${akGuessTarget.name}! 🎉`);
+        const questions = akQuestionNum;
+        let bubble = `I knew it! ${akGuessTarget.article} ${akGuessTarget.name}! 🎉`;
+        if (window.GameScores) {
+          GameScores.tryRecord('questions', questions, { lowerIsBetter: true }).then(isNew => {
+            if (isNew) bubble += ` New best — ${questions} questions!`;
+            qAddBubble('computer', bubble);
+          });
+        } else {
+          qAddBubble('computer', bubble);
+        }
       } else {
         akCandidates = akCandidates.filter(c => c.name !== akGuessTarget.name);
         akQuestionNum++;

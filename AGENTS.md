@@ -71,7 +71,9 @@ Toggle: `localStorage` key `hub-transitions-enabled` (default on). Session key `
 | `account.html` | Sign in / sign up / import local data |
 | `CLOUDFLARE_SETUP.md` | Full deployment steps |
 
-Synced keys: `hub-notes`, `hub-todos`, `hub-colors`, `hub-transitions-enabled`.
+Synced keys: `hub-notes`, `hub-todos`, `hub-colors`, `hub-transitions-enabled`, `hub-game-scores`.
+
+`games/scores.js` persists per-game bests via `GameScores` + `HubStorage`.
 
 ## Conventions
 

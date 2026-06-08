@@ -135,7 +135,13 @@
           astUpdateHUD();
           if (astLives <= 0) {
             astRunning = false;
-            document.getElementById('ast-message').textContent = `Game over! Final score: ${astScore}`;
+            const text = `Game over! Final score: ${astScore}`;
+            document.getElementById('ast-message').textContent = text;
+            if (window.GameScores) {
+              GameScores.tryRecord('asteroids', astScore).then(isNew => {
+                if (isNew) document.getElementById('ast-message').textContent = `${text} New high score!`;
+              });
+            }
             return;
           }
           break;

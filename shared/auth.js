@@ -62,6 +62,7 @@ window.HubAuth = {
       'hub-todos': localStorage.getItem('hub-todos') || '[]',
       'hub-colors': localStorage.getItem('hub-colors') || '[]',
       'hub-transitions-enabled': localStorage.getItem('hub-transitions-enabled') || 'true',
+      'hub-game-scores': localStorage.getItem('hub-game-scores') || '{}',
     };
 
     const res = await fetch('/api/auth/import', {

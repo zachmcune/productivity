@@ -25,10 +25,14 @@ window.BrainBreak = {
     this._games[name]?.stop?.();
   },
 
-  boot() {
+  async boot() {
     document.querySelectorAll('.game-pick').forEach(btn => {
       btn.addEventListener('click', () => this.switchGame(btn.dataset.game));
     });
+    if (window.GameScores) {
+      await GameScores.init();
+      GameScores.updateAllDisplays();
+    }
     Object.values(this._games).forEach(g => g.init?.());
     this.switchGame('memory');
   },

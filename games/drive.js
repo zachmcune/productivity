@@ -2,6 +2,7 @@
   const BrainBreak = window.BrainBreak;
 
   let driveReady = false;
+  let savedBestLap = null;
 
   function formatLap(secs) {
     if (!secs) return '—';
@@ -10,12 +11,31 @@
     return m > 0 ? `${m}:${s.padStart(4, '0')}` : `${s}s`;
   }
 
-  function driveInit() {
+  function updateBestDisplay(sessionBest) {
+    const display = savedBestLap && sessionBest
+      ? Math.min(savedBestLap, sessionBest)
+      : (sessionBest || savedBestLap);
+    document.getElementById('drive-best').textContent = formatLap(display);
+    if (sessionBest && (savedBestLap == null || sessionBest < savedBestLap)) {
+      savedBestLap = sessionBest;
+      if (window.GameScores) {
+        GameScores.tryRecord('drive', sessionBest, { lowerIsBetter: true });
+      }
+    }
+  }
+
+  async function driveInit() {
+    if (window.GameScores) {
+      await GameScores.init();
+      savedBestLap = GameScores.get('drive');
+      GameScores.updateDisplay('drive');
+    }
+
     if (!driveReady) {
       window.DriveGame.init(document.getElementById('drive-container'), hud => {
         document.getElementById('drive-speed').textContent = hud.speed;
         document.getElementById('drive-laps').textContent = hud.lap;
-        document.getElementById('drive-best').textContent = formatLap(hud.best);
+        updateBestDisplay(hud.best);
       });
       driveReady = true;
       document.getElementById('drive-start').addEventListener('click', () => {

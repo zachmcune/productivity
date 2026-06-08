@@ -3,6 +3,7 @@ export const ALLOWED_DATA_KEYS = new Set([
   'hub-todos',
   'hub-colors',
   'hub-transitions-enabled',
+  'hub-game-scores',
 ]);
 
 export const MAX_VALUE_BYTES = 512_000;

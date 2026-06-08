@@ -65,8 +65,14 @@
           clearInterval(timerInterval);
           const m = Math.floor(seconds / 60), s = seconds % 60;
           const msg = document.getElementById('mem-message');
-          msg.textContent = `You won in ${moves} moves and ${m}:${String(s).padStart(2, '0')}! 🎉`;
+          const text = `You won in ${moves} moves and ${m}:${String(s).padStart(2, '0')}! 🎉`;
+          msg.textContent = text;
           msg.classList.add('win');
+          if (window.GameScores) {
+            GameScores.tryMemoryRecord(moves, seconds).then(isNew => {
+              if (isNew) msg.textContent = `${text} New best!`;
+            });
+          }
         }
       } else {
         setTimeout(() => {

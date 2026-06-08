@@ -160,7 +160,13 @@
           pacUpdateHUD();
           if (pacDotsLeft <= 0) {
             pacRunning = false;
-            document.getElementById('pac-message').textContent = `You cleared RAD! Score: ${pacScore} 🎉`;
+            const text = `You cleared RAD! Score: ${pacScore} 🎉`;
+            document.getElementById('pac-message').textContent = text;
+            if (window.GameScores) {
+              GameScores.tryRecord('pacman', pacScore).then(isNew => {
+                if (isNew) document.getElementById('pac-message').textContent = `${text} New high score!`;
+              });
+            }
             pacDraw();
             return;
           }
@@ -189,7 +195,13 @@
           pacUpdateHUD();
           if (pacLives <= 0) {
             pacRunning = false;
-            document.getElementById('pac-message').textContent = `Game over! Score: ${pacScore}`;
+            const text = `Game over! Score: ${pacScore}`;
+            document.getElementById('pac-message').textContent = text;
+            if (window.GameScores) {
+              GameScores.tryRecord('pacman', pacScore).then(isNew => {
+                if (isNew) document.getElementById('pac-message').textContent = `${text} New high score!`;
+              });
+            }
             return;
           }
           pacPlayer.x = pacPlayer.px;
