@@ -7,4 +7,4 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "productivity-hub-db"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "f7e22210-d2aa-4fa2-aae3-dd30d8a75944"
