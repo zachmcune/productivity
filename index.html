@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Productivity Hub</title>
+  <script>if(sessionStorage.getItem('hub-transition'))document.documentElement.classList.add('page-enter-pending')</script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="transitions.css">
+</head>
+<body>
+  <main class="home">
+    <header class="home-header">
+      <h1>Productivity <span>Hub</span></h1>
+      <p>Your productivity toolkit — all in one place.</p>
+    </header>
+
+    <div class="card-grid">
+      <a href="calculator.html" class="card card--calc">
+        <span class="card-icon">🔢</span>
+        <h2>Calculator</h2>
+        <p>Quick math without leaving your flow.</p>
+      </a>
+
+      <a href="notes.html" class="card card--notes">
+        <span class="card-icon">📝</span>
+        <h2>Notes & To-Do</h2>
+        <p>Jot ideas and check off tasks.</p>
+      </a>
+
+      <a href="converter.html" class="card card--convert">
+        <span class="card-icon">🔄</span>
+        <h2>Unit Converter</h2>
+        <p>Convert length, weight, and temperature.</p>
+      </a>
+
+      <a href="timer.html" class="card card--timer">
+        <span class="card-icon">⏱️</span>
+        <h2>Timer & Stopwatch</h2>
+        <p>Track time for focus sessions or breaks.</p>
+      </a>
+
+      <a href="colors.html" class="card card--colors">
+        <span class="card-icon">🎨</span>
+        <h2>Color Picker</h2>
+        <p>Pick, preview, and copy color codes.</p>
+      </a>
+
+      <a href="brain-break.html" class="card card--brain">
+        <span class="card-icon">🧠</span>
+        <h2>Brain Break</h2>
+        <p>Memory, Asteroids, RAD-Man, and an Akinator-style guesser.</p>
+      </a>
+    </div>
+  </main>
+  <script src="transitions.js"></script>
+</body>
+</html>

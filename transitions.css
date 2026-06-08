@@ -1,0 +1,33 @@
+html.page-enter-pending .nav,
+html.page-enter-pending main {
+  opacity: 0;
+  visibility: hidden;
+}
+
+body.transition-active {
+  background: #0d0d12;
+}
+
+body.transition-chrome-hidden .nav,
+body.transition-chrome-hidden main {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#transition-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+#transition-canvas.active {
+  pointer-events: all;
+}
+
+.melt-hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

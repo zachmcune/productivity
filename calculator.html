@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator — Productivity Hub</title>
+  <script>if(sessionStorage.getItem('hub-transition'))document.documentElement.classList.add('page-enter-pending')</script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="transitions.css">
+  <style>
+    .calc-wrap {
+      display: flex;
+      justify-content: center;
+    }
+
+    .calculator {
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .display {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem 1rem;
+      margin-bottom: 1rem;
+      text-align: right;
+      min-height: 5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .expression {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      min-height: 1.25rem;
+      word-break: break-all;
+    }
+
+    .result {
+      font-size: 2.5rem;
+      font-weight: 300;
+      word-break: break-all;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+    }
+
+    .buttons button {
+      border: none;
+      border-radius: 0.75rem;
+      padding: 1.1rem;
+      font-size: 1.25rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.15s;
+    }
+
+    .buttons button:active {
+      transform: scale(0.95);
+    }
+
+    .btn-number {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+
+    .btn-number:hover {
+      background: #35354a;
+    }
+
+    .btn-operator {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-operator:hover {
+      background: #ff6b6b;
+    }
+
+    .btn-action {
+      background: #2a3a5c;
+      color: #fff;
+    }
+
+    .btn-action:hover {
+      background: #354a75;
+    }
+
+    .btn-equals {
+      background: var(--success);
+      color: var(--bg);
+      grid-column: span 2;
+    }
+
+    .btn-equals:hover {
+      background: #6ee7b7;
+    }
+
+    .btn-zero {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">Productivity <span>Hub</span></a>
+    <a href="index.html" class="nav-home">🏠 Home</a>
+  </nav>
+
+  <main class="page">
+    <h1 class="page-title">Calculator</h1>
+    <p class="page-subtitle">Basic arithmetic at your fingertips.</p>
+
+    <div class="panel calc-wrap">
+      <div class="calculator">
+        <div class="display">
+          <div class="expression" id="expression"></div>
+          <div class="result" id="result">0</div>
+        </div>
+        <div class="buttons">
+          <button class="btn-action" data-action="clear">C</button>
+          <button class="btn-action" data-action="backspace">⌫</button>
+          <button class="btn-action" data-action="percent">%</button>
+          <button class="btn-operator" data-operator="/">÷</button>
+
+          <button class="btn-number" data-number="7">7</button>
+          <button class="btn-number" data-number="8">8</button>
+          <button class="btn-number" data-number="9">9</button>
+          <button class="btn-operator" data-operator="*">×</button>
+
+          <button class="btn-number" data-number="4">4</button>
+          <button class="btn-number" data-number="5">5</button>
+          <button class="btn-number" data-number="6">6</button>
+          <button class="btn-operator" data-operator="-">−</button>
+
+          <button class="btn-number" data-number="1">1</button>
+          <button class="btn-number" data-number="2">2</button>
+          <button class="btn-number" data-number="3">3</button>
+          <button class="btn-operator" data-operator="+">+</button>
+
+          <button class="btn-number btn-zero" data-number="0">0</button>
+          <button class="btn-number" data-number=".">.</button>
+          <button class="btn-equals" data-action="equals">=</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let currentValue = '0';
+    let previousValue = '';
+    let operator = null;
+    let shouldResetDisplay = false;
+
+    const resultEl = document.getElementById('result');
+    const expressionEl = document.getElementById('expression');
+
+    function updateDisplay() {
+      resultEl.textContent = currentValue;
+      if (operator && previousValue) {
+        const symbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+        expressionEl.textContent = `${previousValue} ${symbols[operator]}`;
+      } else {
+        expressionEl.textContent = '';
+      }
+    }
+
+    function inputNumber(num) {
+      if (shouldResetDisplay) {
+        currentValue = num === '.' ? '0.' : num;
+        shouldResetDisplay = false;
+      } else if (num === '.' && currentValue.includes('.')) {
+        return;
+      } else if (currentValue === '0' && num !== '.') {
+        currentValue = num;
+      } else {
+        currentValue += num;
+      }
+      updateDisplay();
+    }
+
+    function inputOperator(op) {
+      if (operator && !shouldResetDisplay) calculate();
+      previousValue = currentValue;
+      operator = op;
+      shouldResetDisplay = true;
+      updateDisplay();
+    }
+
+    function calculate() {
+      if (!operator || !previousValue) return;
+
+      const a = parseFloat(previousValue);
+      const b = parseFloat(currentValue);
+      let answer;
+
+      switch (operator) {
+        case '+': answer = a + b; break;
+        case '-': answer = a - b; break;
+        case '*': answer = a * b; break;
+        case '/':
+          if (b === 0) {
+            currentValue = 'Error';
+            previousValue = '';
+            operator = null;
+            updateDisplay();
+            return;
+          }
+          answer = a / b;
+          break;
+      }
+
+      currentValue = String(Math.round(answer * 1e10) / 1e10);
+      expressionEl.textContent = `${previousValue} ${operator === '*' ? '×' : operator === '/' ? '÷' : operator} ${b} =`;
+      previousValue = '';
+      operator = null;
+      shouldResetDisplay = true;
+      updateDisplay();
+    }
+
+    function clear() {
+      currentValue = '0';
+      previousValue = '';
+      operator = null;
+      shouldResetDisplay = false;
+      updateDisplay();
+    }
+
+    function backspace() {
+      if (currentValue === 'Error') { clear(); return; }
+      currentValue = currentValue.length === 1 ? '0' : currentValue.slice(0, -1);
+      updateDisplay();
+    }
+
+    function percent() {
+      if (currentValue === 'Error') return;
+      currentValue = String(parseFloat(currentValue) / 100);
+      updateDisplay();
+    }
+
+    document.querySelectorAll('[data-number]').forEach(btn => {
+      btn.addEventListener('click', () => inputNumber(btn.dataset.number));
+    });
+
+    document.querySelectorAll('[data-operator]').forEach(btn => {
+      btn.addEventListener('click', () => inputOperator(btn.dataset.operator));
+    });
+
+    document.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        if (action === 'clear') clear();
+        else if (action === 'backspace') backspace();
+        else if (action === 'percent') percent();
+        else if (action === 'equals') calculate();
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key >= '0' && e.key <= '9' || e.key === '.') inputNumber(e.key);
+      else if (['+', '-', '*', '/'].includes(e.key)) inputOperator(e.key);
+      else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calculate(); }
+      else if (e.key === 'Escape') clear();
+      else if (e.key === 'Backspace') backspace();
+    });
+  </script>
+  <script src="transitions.js"></script>
+</body>
+</html>

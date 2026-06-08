@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unit Converter — Productivity Hub</title>
+  <script>if(sessionStorage.getItem('hub-transition'))document.documentElement.classList.add('page-enter-pending')</script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="transitions.css">
+  <style>
+    .category-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .category-tab {
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 2rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .category-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .convert-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .convert-row label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .convert-row-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .convert-row-group input {
+      flex: 2;
+    }
+
+    .convert-row-group select {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .swap-btn {
+      display: block;
+      margin: 0.5rem auto 1rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--accent);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+    }
+
+    .swap-btn:hover {
+      background: var(--surface-hover);
+      transform: rotate(180deg);
+    }
+
+    .result-display {
+      text-align: center;
+      padding: 1.25rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .result-value {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    .result-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">Productivity <span>Hub</span></a>
+    <a href="index.html" class="nav-home">🏠 Home</a>
+  </nav>
+
+  <main class="page">
+    <h1 class="page-title">Unit Converter</h1>
+    <p class="page-subtitle">Convert between common units instantly.</p>
+
+    <div class="panel">
+      <div class="category-tabs" id="categoryTabs">
+        <button class="category-tab active" data-category="length">Length</button>
+        <button class="category-tab" data-category="weight">Weight</button>
+        <button class="category-tab" data-category="temperature">Temperature</button>
+      </div>
+
+      <div class="convert-row">
+        <label>From</label>
+        <div class="convert-row-group">
+          <input type="number" id="fromValue" value="1" step="any">
+          <select id="fromUnit"></select>
+        </div>
+      </div>
+
+      <button class="swap-btn" id="swapBtn" title="Swap units">⇅</button>
+
+      <div class="convert-row">
+        <label>To</label>
+        <div class="convert-row-group">
+          <input type="number" id="toValue" readonly tabindex="-1">
+          <select id="toUnit"></select>
+        </div>
+      </div>
+
+      <div class="result-display">
+        <div class="result-value" id="resultText">—</div>
+        <div class="result-label" id="resultLabel"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const units = {
+      length: {
+        m: 1,
+        km: 1000,
+        cm: 0.01,
+        mm: 0.001,
+        mi: 1609.344,
+        yd: 0.9144,
+        ft: 0.3048,
+        in: 0.0254,
+      },
+      weight: {
+        kg: 1,
+        g: 0.001,
+        mg: 0.000001,
+        lb: 0.453592,
+        oz: 0.0283495,
+      },
+      temperature: {
+        c: 'c',
+        f: 'f',
+        k: 'k',
+      },
+    };
+
+    const unitLabels = {
+      m: 'Meters', km: 'Kilometers', cm: 'Centimeters', mm: 'Millimeters',
+      mi: 'Miles', yd: 'Yards', ft: 'Feet', in: 'Inches',
+      kg: 'Kilograms', g: 'Grams', mg: 'Milligrams', lb: 'Pounds', oz: 'Ounces',
+      c: 'Celsius', f: 'Fahrenheit', k: 'Kelvin',
+    };
+
+    let category = 'length';
+
+    const fromValue = document.getElementById('fromValue');
+    const toValue = document.getElementById('toValue');
+    const fromUnit = document.getElementById('fromUnit');
+    const toUnit = document.getElementById('toUnit');
+    const resultText = document.getElementById('resultText');
+    const resultLabel = document.getElementById('resultLabel');
+
+    function populateUnits() {
+      const keys = Object.keys(units[category]);
+      fromUnit.innerHTML = keys.map(k => `<option value="${k}">${unitLabels[k]}</option>`).join('');
+      toUnit.innerHTML = keys.map(k => `<option value="${k}">${unitLabels[k]}</option>`).join('');
+      if (keys.length > 1) toUnit.selectedIndex = 1;
+      convert();
+    }
+
+    function convertTemp(value, from, to) {
+      let celsius;
+      if (from === 'c') celsius = value;
+      else if (from === 'f') celsius = (value - 32) * 5 / 9;
+      else celsius = value - 273.15;
+
+      if (to === 'c') return celsius;
+      if (to === 'f') return celsius * 9 / 5 + 32;
+      return celsius + 273.15;
+    }
+
+    function convert() {
+      const val = parseFloat(fromValue.value);
+      const from = fromUnit.value;
+      const to = toUnit.value;
+
+      if (isNaN(val)) {
+        toValue.value = '';
+        resultText.textContent = '—';
+        resultLabel.textContent = '';
+        return;
+      }
+
+      let result;
+      if (category === 'temperature') {
+        result = convertTemp(val, from, to);
+      } else {
+        const base = val * units[category][from];
+        result = base / units[category][to];
+      }
+
+      const rounded = Math.round(result * 1e6) / 1e6;
+      toValue.value = rounded;
+      resultText.textContent = rounded;
+      resultLabel.textContent = `${val} ${unitLabels[from]} = ${rounded} ${unitLabels[to]}`;
+    }
+
+    document.getElementById('categoryTabs').addEventListener('click', (e) => {
+      const tab = e.target.closest('.category-tab');
+      if (!tab) return;
+      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      category = tab.dataset.category;
+      populateUnits();
+    });
+
+    document.getElementById('swapBtn').addEventListener('click', () => {
+      const tempUnit = fromUnit.value;
+      fromUnit.value = toUnit.value;
+      toUnit.value = tempUnit;
+      fromValue.value = toValue.value || fromValue.value;
+      convert();
+    });
+
+    fromValue.addEventListener('input', convert);
+    fromUnit.addEventListener('change', convert);
+    toUnit.addEventListener('change', convert);
+
+    populateUnits();
+  </script>
+  <script src="transitions.js"></script>
+</body>
+</html>

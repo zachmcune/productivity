@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Picker — Productivity Hub</title>
+  <script>if(sessionStorage.getItem('hub-transition'))document.documentElement.classList.add('page-enter-pending')</script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="transitions.css">
+  <style>
+    .color-preview {
+      width: 100%;
+      height: 180px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      transition: background 0.1s;
+    }
+
+    .picker-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    #colorInput {
+      width: 4rem;
+      height: 4rem;
+      padding: 0;
+      border: 2px solid var(--border);
+      border-radius: 0.75rem;
+      cursor: pointer;
+      background: none;
+    }
+
+    #colorInput::-webkit-color-swatch-wrapper {
+      padding: 2px;
+    }
+
+    #colorInput::-webkit-color-swatch {
+      border: none;
+      border-radius: 0.5rem;
+    }
+
+    .sliders {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .slider-group label {
+      width: 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .slider-group input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .slider-group span {
+      width: 2.5rem;
+      text-align: right;
+      font-size: 0.85rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+    }
+
+    .code-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .code-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+    }
+
+    .code-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      width: 3rem;
+      flex-shrink: 0;
+    }
+
+    .code-value {
+      flex: 1;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.95rem;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      padding: 0.35rem 0.75rem;
+      background: var(--surface-hover);
+      border: 1px solid var(--border);
+      border-radius: 0.4rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .copy-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .copy-btn.copied {
+      color: var(--success);
+      border-color: var(--success);
+    }
+
+    .saved-colors {
+      margin-top: 2rem;
+    }
+
+    .saved-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .saved-swatch {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.5rem;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.1s, border-color 0.15s;
+    }
+
+    .saved-swatch:hover {
+      transform: scale(1.1);
+      border-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">Productivity <span>Hub</span></a>
+    <a href="index.html" class="nav-home">🏠 Home</a>
+  </nav>
+
+  <main class="page">
+    <h1 class="page-title">Color Picker</h1>
+    <p class="page-subtitle">Pick a color and copy its code for your projects.</p>
+
+    <div class="panel">
+      <div class="color-preview" id="preview"></div>
+
+      <div class="picker-row">
+        <input type="color" id="colorInput" value="#6c8cff">
+        <div class="sliders">
+          <div class="slider-group">
+            <label>R</label>
+            <input type="range" id="sliderR" min="0" max="255" value="108">
+            <span id="valR">108</span>
+          </div>
+          <div class="slider-group">
+            <label>G</label>
+            <input type="range" id="sliderG" min="0" max="255" value="140">
+            <span id="valG">140</span>
+          </div>
+          <div class="slider-group">
+            <label>B</label>
+            <input type="range" id="sliderB" min="0" max="255" value="255">
+            <span id="valB">255</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-list">
+        <div class="code-row">
+          <span class="code-label">HEX</span>
+          <span class="code-value" id="hexCode">#6C8CFF</span>
+          <button class="copy-btn" data-target="hexCode">Copy</button>
+        </div>
+        <div class="code-row">
+          <span class="code-label">RGB</span>
+          <span class="code-value" id="rgbCode">rgb(108, 140, 255)</span>
+          <button class="copy-btn" data-target="rgbCode">Copy</button>
+        </div>
+        <div class="code-row">
+          <span class="code-label">HSL</span>
+          <span class="code-value" id="hslCode">hsl(226, 100%, 71%)</span>
+          <button class="copy-btn" data-target="hslCode">Copy</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.25rem; display: flex; gap: 0.5rem;">
+        <button class="btn btn-primary" id="saveColor">Save color</button>
+        <button class="btn btn-secondary" id="clearSaved">Clear saved</button>
+      </div>
+    </div>
+
+    <div class="saved-colors" id="savedSection" style="display: none;">
+      <div class="section-label" style="font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Saved Colors</div>
+      <div class="saved-grid" id="savedGrid"></div>
+    </div>
+  </main>
+
+  <script>
+    const SAVED_KEY = 'hub-colors';
+    const preview = document.getElementById('preview');
+    const colorInput = document.getElementById('colorInput');
+    const sliderR = document.getElementById('sliderR');
+    const sliderG = document.getElementById('sliderG');
+    const sliderB = document.getElementById('sliderB');
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) { h = s = 0; }
+      else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+      return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+    }
+
+    function toHex(r, g, b) {
+      return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+    }
+
+    function updateFromRgb(r, g, b) {
+      sliderR.value = r;
+      sliderG.value = g;
+      sliderB.value = b;
+      document.getElementById('valR').textContent = r;
+      document.getElementById('valG').textContent = g;
+      document.getElementById('valB').textContent = b;
+
+      const hex = toHex(r, g, b);
+      colorInput.value = hex;
+      preview.style.background = hex;
+
+      const [h, s, l] = rgbToHsl(r, g, b);
+      document.getElementById('hexCode').textContent = hex;
+      document.getElementById('rgbCode').textContent = `rgb(${r}, ${g}, ${b})`;
+      document.getElementById('hslCode').textContent = `hsl(${h}, ${s}%, ${l}%)`;
+    }
+
+    function hexToRgb(hex) {
+      const n = parseInt(hex.slice(1), 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+
+    colorInput.addEventListener('input', () => {
+      const [r, g, b] = hexToRgb(colorInput.value);
+      updateFromRgb(r, g, b);
+    });
+
+    [sliderR, sliderG, sliderB].forEach(slider => {
+      slider.addEventListener('input', () => {
+        updateFromRgb(+sliderR.value, +sliderG.value, +sliderB.value);
+      });
+    });
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = document.getElementById(btn.dataset.target).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 1500);
+        });
+      });
+    });
+
+    let saved = JSON.parse(localStorage.getItem(SAVED_KEY) || '[]');
+
+    function renderSaved() {
+      const grid = document.getElementById('savedGrid');
+      const section = document.getElementById('savedSection');
+      grid.innerHTML = '';
+      section.style.display = saved.length ? 'block' : 'none';
+      saved.forEach(hex => {
+        const swatch = document.createElement('button');
+        swatch.className = 'saved-swatch';
+        swatch.style.background = hex;
+        swatch.title = hex;
+        swatch.addEventListener('click', () => {
+          const [r, g, b] = hexToRgb(hex);
+          updateFromRgb(r, g, b);
+        });
+        grid.appendChild(swatch);
+      });
+    }
+
+    document.getElementById('saveColor').addEventListener('click', () => {
+      const hex = document.getElementById('hexCode').textContent;
+      if (!saved.includes(hex)) {
+        saved.push(hex);
+        localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+        renderSaved();
+      }
+    });
+
+    document.getElementById('clearSaved').addEventListener('click', () => {
+      if (saved.length && !confirm('Clear all saved colors?')) return;
+      saved = [];
+      localStorage.setItem(SAVED_KEY, '[]');
+      renderSaved();
+    });
+
+    updateFromRgb(108, 140, 255);
+    renderSaved();
+  </script>
+  <script src="transitions.js"></script>
+</body>
+</html>
