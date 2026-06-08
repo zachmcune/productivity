@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Color Picker — Productivity Hub</title>
-  <script>if(sessionStorage.getItem('hub-transition')&&localStorage.getItem('hub-transitions-enabled')!=='false')document.documentElement.classList.add('page-enter-pending')</script>
+  <script src="shared/transition-preload.js"></script>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="transitions.css">
   <style>
@@ -159,11 +159,6 @@
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <a href="index.html" class="nav-brand">Productivity <span>Hub</span></a>
-    <a href="index.html" class="nav-home">🏠 Home</a>
-  </nav>
-
   <main class="page">
     <h1 class="page-title">Color Picker</h1>
     <p class="page-subtitle">Pick a color and copy its code for your projects.</p>
@@ -338,6 +333,8 @@
     updateFromRgb(108, 140, 255);
     renderSaved();
   </script>
+  <script src="shared/layout.js"></script>
+  <script>SiteLayout.injectNav();</script>
   <script src="transitions.js"></script>
 </body>
 </html>
