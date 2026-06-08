@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account — Productivity Hub</title>
+  <script src="shared/transition-preload.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="transitions.css">
+  <style>
+    .account-panel { max-width: 420px; margin: 0 auto; }
+
+    .account-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .account-tab {
+      flex: 1;
+      padding: 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .account-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .account-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .account-form label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .account-form input {
+      padding: 0.75rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .account-message {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 0.6rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .account-message.visible { display: block; }
+    .account-message.error {
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      background: rgba(233, 69, 96, 0.1);
+    }
+    .account-message.success {
+      color: var(--success);
+      border: 1px solid var(--success);
+      background: rgba(78, 204, 163, 0.1);
+    }
+
+    .account-signed-in { display: none; text-align: center; }
+    .account-signed-in.visible { display: block; }
+    .account-signed-in p { color: var(--text-muted); margin-bottom: 1rem; }
+    .account-signed-in strong { color: var(--text); }
+
+    .account-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .account-hint {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1 class="page-title">Account</h1>
+    <p class="page-subtitle">Sign in to sync notes, todos, and colors across devices.</p>
+
+    <div class="panel account-panel">
+      <div id="signed-out">
+        <div class="account-tabs">
+          <button class="account-tab active" data-tab="login" type="button">Sign in</button>
+          <button class="account-tab" data-tab="signup" type="button">Create account</button>
+        </div>
+
+        <form class="account-form" id="login-form">
+          <label>Email
+            <input type="email" name="email" autocomplete="email" required>
+          </label>
+          <label>Password
+            <input type="password" name="password" autocomplete="current-password" required>
+          </label>
+          <button class="btn btn-primary" type="submit">Sign in</button>
+        </form>
+
+        <form class="account-form" id="signup-form" hidden>
+          <label>Email
+            <input type="email" name="email" autocomplete="email" required>
+          </label>
+          <label>Password
+            <input type="password" name="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <button class="btn btn-primary" type="submit">Create account</button>
+        </form>
+
+        <div class="account-message" id="form-message"></div>
+      </div>
+
+      <div class="account-signed-in" id="signed-in">
+        <p>Signed in as<br><strong id="user-email"></strong></p>
+        <div class="account-actions">
+          <button class="btn btn-secondary" id="import-btn" type="button">Import browser data to cloud</button>
+          <button class="btn btn-primary" id="logout-btn" type="button">Sign out</button>
+        </div>
+        <div class="account-message" id="signed-message"></div>
+      </div>
+
+      <p class="account-hint">
+        Guest mode still works — data stays in your browser until you sign in.
+        After signing in, use “Import browser data” once to copy existing notes and todos to your account.
+      </p>
+    </div>
+  </main>
+
+  <script src="shared/auth.js"></script>
+  <script src="shared/hub-storage.js"></script>
+  <script>
+    const signedOut = document.getElementById('signed-out');
+    const signedIn = document.getElementById('signed-in');
+    const formMessage = document.getElementById('form-message');
+    const signedMessage = document.getElementById('signed-message');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+
+    function showMessage(el, text, type) {
+      el.textContent = text;
+      el.className = `account-message visible ${type}`;
+    }
+
+    function clearMessage(el) {
+      el.className = 'account-message';
+      el.textContent = '';
+    }
+
+    function setTab(tab) {
+      document.querySelectorAll('.account-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      loginForm.hidden = tab !== 'login';
+      signupForm.hidden = tab !== 'signup';
+      clearMessage(formMessage);
+    }
+
+    document.querySelectorAll('.account-tab').forEach(btn => {
+      btn.addEventListener('click', () => setTab(btn.dataset.tab));
+    });
+
+    async function renderSession() {
+      const user = await HubAuth.me();
+      if (user) {
+        signedOut.style.display = 'none';
+        signedIn.classList.add('visible');
+        document.getElementById('user-email').textContent = user.email;
+      } else {
+        signedOut.style.display = 'block';
+        signedIn.classList.remove('visible');
+      }
+    }
+
+    loginForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      clearMessage(formMessage);
+      const fd = new FormData(loginForm);
+      try {
+        await HubAuth.login(fd.get('email'), fd.get('password'));
+        window.location.href = 'index.html';
+      } catch (err) {
+        showMessage(formMessage, err.message, 'error');
+      }
+    });
+
+    signupForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      clearMessage(formMessage);
+      const fd = new FormData(signupForm);
+      try {
+        await HubAuth.signup(fd.get('email'), fd.get('password'));
+        window.location.href = 'index.html';
+      } catch (err) {
+        showMessage(formMessage, err.message, 'error');
+      }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await HubAuth.logout();
+      clearMessage(signedMessage);
+      await renderSession();
+      HubAuth.bindNav();
+    });
+
+    document.getElementById('import-btn').addEventListener('click', async () => {
+      clearMessage(signedMessage);
+      try {
+        const count = await HubAuth.importLocalData();
+        showMessage(signedMessage, `Imported ${count} item(s) from this browser.`, 'success');
+      } catch (err) {
+        showMessage(signedMessage, err.message, 'error');
+      }
+    });
+
+    renderSession();
+  </script>
+  <script src="shared/layout.js"></script>
+  <script>
+    SiteLayout.injectNav();
+    HubAuth.bindNav();
+  </script>
+  <script src="transitions.js"></script>
+</body>
+</html>

@@ -248,8 +248,13 @@
 
     populateUnits();
   </script>
+  <script src="shared/auth.js"></script>
+  <script src="shared/hub-storage.js"></script>
   <script src="shared/layout.js"></script>
-  <script>SiteLayout.injectNav();</script>
+  <script>
+    SiteLayout.injectNav();
+    HubAuth.bindNav();
+  </script>
   <script src="transitions.js"></script>
 </body>
 </html>

@@ -108,7 +108,7 @@
 <body>
   <main class="page">
     <h1 class="page-title">Notes & To-Do</h1>
-    <p class="page-subtitle">Capture thoughts and track what needs doing. Saved automatically in your browser.</p>
+    <p class="page-subtitle">Capture thoughts and track what needs doing. Saved automatically — in the cloud when signed in.</p>
 
     <div class="panel">
       <div class="section-label">To-Do List</div>
@@ -130,6 +130,8 @@
     </div>
   </main>
 
+  <script src="shared/auth.js"></script>
+  <script src="shared/hub-storage.js"></script>
   <script>
     const TODO_KEY = 'hub-todos';
     const NOTES_KEY = 'hub-notes';
@@ -140,10 +142,10 @@
     const notesArea = document.getElementById('notesArea');
     const charCount = document.getElementById('charCount');
 
-    let todos = JSON.parse(localStorage.getItem(TODO_KEY) || '[]');
+    let todos = [];
 
-    function saveTodos() {
-      localStorage.setItem(TODO_KEY, JSON.stringify(todos));
+    async function saveTodos() {
+      await HubStorage.set(TODO_KEY, JSON.stringify(todos));
     }
 
     function renderTodos() {
@@ -168,54 +170,64 @@
       return div.innerHTML;
     }
 
-    function addTodo() {
+    async function addTodo() {
       const text = todoInput.value.trim();
       if (!text) return;
       todos.push({ text, done: false });
       todoInput.value = '';
-      saveTodos();
+      await saveTodos();
       renderTodos();
     }
 
-    document.getElementById('addTodo').addEventListener('click', addTodo);
+    document.getElementById('addTodo').addEventListener('click', () => { addTodo(); });
     todoInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') addTodo();
     });
 
-    todoList.addEventListener('click', (e) => {
+    todoList.addEventListener('click', async (e) => {
       const index = e.target.dataset.index;
       if (index === undefined) return;
 
       if (e.target.type === 'checkbox') {
         todos[index].done = e.target.checked;
-        saveTodos();
+        await saveTodos();
         renderTodos();
       } else if (e.target.classList.contains('todo-delete')) {
         todos.splice(index, 1);
-        saveTodos();
+        await saveTodos();
         renderTodos();
       }
     });
 
-    notesArea.value = localStorage.getItem(NOTES_KEY) || '';
-    charCount.textContent = `${notesArea.value.length} characters`;
-
+    let notesSaveTimer;
     notesArea.addEventListener('input', () => {
-      localStorage.setItem(NOTES_KEY, notesArea.value);
       charCount.textContent = `${notesArea.value.length} characters`;
+      clearTimeout(notesSaveTimer);
+      notesSaveTimer = setTimeout(() => {
+        HubStorage.set(NOTES_KEY, notesArea.value);
+      }, 400);
     });
 
-    document.getElementById('clearNotes').addEventListener('click', () => {
+    document.getElementById('clearNotes').addEventListener('click', async () => {
       if (notesArea.value && !confirm('Clear all notes?')) return;
       notesArea.value = '';
-      localStorage.setItem(NOTES_KEY, '');
+      await HubStorage.set(NOTES_KEY, '');
       charCount.textContent = '0 characters';
     });
 
-    renderTodos();
+    (async () => {
+      await HubStorage.init();
+      todos = JSON.parse(await HubStorage.get(TODO_KEY, '[]'));
+      notesArea.value = await HubStorage.get(NOTES_KEY, '');
+      charCount.textContent = `${notesArea.value.length} characters`;
+      renderTodos();
+    })();
   </script>
   <script src="shared/layout.js"></script>
-  <script>SiteLayout.injectNav();</script>
+  <script>
+    SiteLayout.injectNav();
+    HubAuth.bindNav();
+  </script>
   <script src="transitions.js"></script>
 </body>
 </html>

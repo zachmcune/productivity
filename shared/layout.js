@@ -6,7 +6,10 @@ window.SiteLayout = {
     nav.className = 'nav';
     nav.innerHTML = `
       <a href="index.html" class="nav-brand">Productivity <span>Hub</span></a>
-      <a href="index.html" class="nav-home">🏠 Home</a>
+      <div class="nav-actions">
+        <a href="index.html" class="nav-home">🏠 Home</a>
+        <a href="account.html" class="nav-auth" id="nav-auth">Sign in</a>
+      </div>
     `;
     document.body.insertBefore(nav, document.body.firstChild);
   },

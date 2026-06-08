@@ -526,30 +526,48 @@
   }
 
   function isTransitionsEnabled() {
+    if (window.HubStorage?.isCloud()) {
+      return HubStorage.getSync(SETTINGS_KEY, 'true') !== 'false';
+    }
     return localStorage.getItem(SETTINGS_KEY) !== 'false';
   }
 
-  function createToggle() {
+  async function createToggle() {
+    let enabled = true;
+    if (window.HubStorage) {
+      await HubStorage.init();
+      const stored = await HubStorage.get(SETTINGS_KEY, 'true');
+      enabled = stored !== 'false';
+    } else {
+      enabled = isTransitionsEnabled();
+    }
+
     const wrap = document.createElement('div');
     wrap.id = 'transition-toggle';
     wrap.className = 'transition-toggle';
     wrap.innerHTML = `
       <label class="transition-toggle-label" title="Page transition animations">
         <span class="transition-toggle-text">Animations</span>
-        <input type="checkbox" id="transition-toggle-input" ${isTransitionsEnabled() ? 'checked' : ''}>
+        <input type="checkbox" id="transition-toggle-input" ${enabled ? 'checked' : ''}>
         <span class="transition-toggle-slider"></span>
       </label>
     `;
     document.body.appendChild(wrap);
 
-    document.getElementById('transition-toggle-input').addEventListener('change', (e) => {
-      localStorage.setItem(SETTINGS_KEY, e.target.checked ? 'true' : 'false');
+    document.getElementById('transition-toggle-input').addEventListener('change', async (e) => {
+      const value = e.target.checked ? 'true' : 'false';
+      if (window.HubStorage) {
+        await HubStorage.set(SETTINGS_KEY, value);
+      } else {
+        localStorage.setItem(SETTINGS_KEY, value);
+      }
     });
   }
 
-  function init() {
+  async function init() {
+    if (window.HubStorage) await HubStorage.init();
     setupCanvas();
-    createToggle();
+    await createToggle();
 
     document.addEventListener('click', e => {
       if (!isTransitionsEnabled()) return;

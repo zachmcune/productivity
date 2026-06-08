@@ -1,0 +1,10 @@
+name = "productivity-hub"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "."
+
+# Replace database_id after creating the D1 database in Cloudflare dashboard.
+# Run: npx wrangler d1 create productivity-hub-db
+[[d1_databases]]
+binding = "DB"
+database_name = "productivity-hub-db"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"

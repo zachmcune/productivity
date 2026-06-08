@@ -217,6 +217,8 @@
     </div>
   </main>
 
+  <script src="shared/auth.js"></script>
+  <script src="shared/hub-storage.js"></script>
   <script>
     const SAVED_KEY = 'hub-colors';
     const preview = document.getElementById('preview');
@@ -294,7 +296,7 @@
       });
     });
 
-    let saved = JSON.parse(localStorage.getItem(SAVED_KEY) || '[]');
+    let saved = [];
 
     function renderSaved() {
       const grid = document.getElementById('savedGrid');
@@ -314,27 +316,34 @@
       });
     }
 
-    document.getElementById('saveColor').addEventListener('click', () => {
+    document.getElementById('saveColor').addEventListener('click', async () => {
       const hex = document.getElementById('hexCode').textContent;
       if (!saved.includes(hex)) {
         saved.push(hex);
-        localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+        await HubStorage.set(SAVED_KEY, JSON.stringify(saved));
         renderSaved();
       }
     });
 
-    document.getElementById('clearSaved').addEventListener('click', () => {
+    document.getElementById('clearSaved').addEventListener('click', async () => {
       if (saved.length && !confirm('Clear all saved colors?')) return;
       saved = [];
-      localStorage.setItem(SAVED_KEY, '[]');
+      await HubStorage.set(SAVED_KEY, '[]');
       renderSaved();
     });
 
-    updateFromRgb(108, 140, 255);
-    renderSaved();
+    (async () => {
+      await HubStorage.init();
+      saved = JSON.parse(await HubStorage.get(SAVED_KEY, '[]'));
+      updateFromRgb(108, 140, 255);
+      renderSaved();
+    })();
   </script>
   <script src="shared/layout.js"></script>
-  <script>SiteLayout.injectNav();</script>
+  <script>
+    SiteLayout.injectNav();
+    HubAuth.bindNav();
+  </script>
   <script src="transitions.js"></script>
 </body>
 </html>
